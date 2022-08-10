@@ -3,13 +3,16 @@ import type { IOnigLib, IRawGrammar, IRawTheme } from 'vscode-textmate'
 import { loadWASM, createOnigScanner, createOnigString } from 'vscode-oniguruma'
 import { parse, ParseError } from 'jsonc-parser'
 import type { IShikiTheme } from './types'
-import { URL } from 'url'
-import { join as nodeJoin } from 'path'
+import { join as nodeJoin } from 'path-browserify'
 
 export const isWebWorker =
   typeof self !== 'undefined' && typeof self.WorkerGlobalScope !== 'undefined'
 
-export const isBrowser = false
+export const isBrowser =
+  isWebWorker ||
+  (typeof window !== 'undefined' &&
+    typeof window.document !== 'undefined' &&
+    typeof fetch !== 'undefined')
 
 // to be replaced by rollup
 let CDN_ROOT = '__CDN_ROOT__'
