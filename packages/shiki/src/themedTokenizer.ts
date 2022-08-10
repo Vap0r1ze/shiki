@@ -217,11 +217,19 @@ function matches(
   return false
 }
 
+const themeScopeCache: Map<string, IRawThemeSetting[]> = new Map()
+
 function explainThemeScope(
   theme: IRawTheme,
   scope: string,
   parentScopes: string[]
 ): IRawThemeSetting[] {
+  const cacheKey = `${theme.name} ${scope} ${parentScopes.sort().join(' ')}`
+  const cachedResult = themeScopeCache.get(cacheKey)
+  if (theme.name && cachedResult) {
+    return cachedResult
+  }
+
   let result: IRawThemeSetting[] = [],
     resultLen = 0
   for (let i = 0, len = theme.settings.length; i < len; i++) {
@@ -249,5 +257,7 @@ function explainThemeScope(
       }
     }
   }
+
+  themeScopeCache.set(cacheKey, result)
   return result
 }
