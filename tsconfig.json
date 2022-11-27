@@ -1,12 +1,11 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es5",
-    "declaration": true,
+    "module": "esnext",
+    "target": "es2017",
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "lib": ["es2015", "es2016.array.include", "DOM", "WebWorker"],
+    "lib": ["esnext", "DOM", "WebWorker"],
     "sourceMap": true
   },
-  "references": [{ "path": "packages/shiki" }, { "path": "packages/renderer-svg" }]
+  "exclude": ["samples"]
 }
