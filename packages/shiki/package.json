@@ -1,6 +1,6 @@
 {
-  "name": "vpc-shiki-renderer",
-  "version": "0.10.2",
+  "name": "shiki",
+  "version": "0.10.1",
   "description": "shiki",
   "author": "Pine Wu <octref@gmail.com>",
   "homepage": "https://github.com/octref/shiki/tree/main/packages/shiki",
