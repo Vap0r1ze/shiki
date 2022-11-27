@@ -23,8 +23,11 @@ export default [
     ],
     plugins: [
       replace({
-        __BROWSER__: JSON.stringify(true),
-        __CDN_ROOT__: ''
+        preventAssignment: true,
+        values: {
+          __BROWSER__: JSON.stringify(true),
+          __CDN_ROOT__: ''
+        }
       }),
       typescript(),
       nodeResolve(),
@@ -43,7 +46,7 @@ export default [
     plugins: [
       dts(),
       copy({
-        targets: [{ src: '../../node_modules/vscode-oniguruma/release/onig.wasm', dest: 'dist' }]
+        targets: [{ src: './node_modules/vscode-oniguruma/release/onig.wasm', dest: 'dist' }]
       })
     ],
     onwarn: (msg, warn) => {
