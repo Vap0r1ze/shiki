@@ -1,6 +1,6 @@
 {
   "name": "@vap/shiki",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "description": "shiki, stripped of assets + browser only",
   "author": "Vap0r1ze",
   "contributors": [
