@@ -6,7 +6,7 @@ import type { IShikiTheme } from './types'
 
 // to be replaced by rollup
 let CDN_ROOT = '__CDN_ROOT__'
-let WASM: ArrayBuffer = new ArrayBuffer(0)
+let WASM: string | ArrayBuffer = ''
 
 export function isURL(string: string) {
   try {
@@ -41,7 +41,7 @@ export function setCDN(root: string) {
  *
  * Accepts Url or ArrayBuffer
  */
-export function setWasm(path: ArrayBuffer) {
+export function setWasm(path: string | ArrayBuffer) {
   WASM = path
 }
 
@@ -49,7 +49,14 @@ let _onigurumaPromise: Promise<IOnigLib> = null
 
 export async function getOniguruma(): Promise<IOnigLib> {
   if (!_onigurumaPromise) {
-    const loader: Promise<void> = loadWASM(WASM)
+    let loader: Promise<void>
+    if (typeof WASM === 'string') {
+      loader = loadWASM({
+        data: await fetch(WASM).then(r => r.arrayBuffer())
+      })
+    } else {
+      loader = loadWASM(WASM)
+    }
 
     _onigurumaPromise = loader.then(() => {
       return {
