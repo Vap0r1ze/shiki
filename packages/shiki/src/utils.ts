@@ -13,8 +13,20 @@ export function dirname(str: string) {
   return parts[parts.length - 2]
 }
 
+export function dirpathparts(str: string) {
+  const parts = str.split(/[\/\\]/g)
+  return parts.slice(0, parts.length - 1)
+}
+
 export function join(...parts: string[]) {
-  return parts.map(trimEndSlash).map(trimStartDot).join('/')
+  const newParts = parts.map(trimEndSlash).map(trimStartDot).join('/').split('/')
+  for (let i = 0; i < newParts.length; i++) {
+    if (newParts[i] === '..') {
+      newParts.splice(i - 1, 2)
+      i -= 2
+    }
+  }
+  return newParts.join('/')
 }
 
 export function groupBy<TElement, TKey>(

@@ -5,83 +5,26 @@ import typescript from 'rollup-plugin-typescript2'
 import copy from 'rollup-plugin-copy'
 import replace from '@rollup/plugin-replace'
 import { terser } from 'rollup-plugin-terser'
-import { version } from './package.json'
-
-const external = ['vscode-oniguruma', 'vscode-textmate']
 
 export default [
   {
     input: 'src/index.ts',
-    external,
     output: [
+      {
+        file: 'dist/index.mjs',
+        format: 'esm'
+      },
       {
         file: 'dist/index.js',
-        format: 'cjs'
-      },
-      {
-        file: 'dist/index.esm.js',
-        format: 'esm'
+        format: 'iife',
+        name: 'shiki',
+        extend: true
       }
     ],
     plugins: [
       replace({
-        __CDN_ROOT__: '',
-        __BROWSER__: JSON.stringify(false)
-      }),
-      typescript(),
-      nodeResolve(),
-      commonjs()
-    ]
-  },
-  {
-    input: 'src/index.ts',
-    output: [
-      {
-        file: 'dist/index.browser.mjs',
-        format: 'esm',
-        plugins: [
-          replace({
-            __CDN_ROOT__: ''
-          })
-        ]
-      },
-      {
-        file: 'dist/index.iife.js',
-        format: 'iife',
-        name: 'shiki',
-        extend: true,
-        plugins: [
-          replace({
-            __CDN_ROOT__: ''
-          })
-        ]
-      },
-      {
-        file: 'dist/index.unpkg.iife.js',
-        format: 'iife',
-        name: 'shiki',
-        extend: true,
-        plugins: [
-          replace({
-            __CDN_ROOT__: `https://unpkg.com/vpc-shiki-fork@${version}/`
-          })
-        ]
-      },
-      {
-        file: 'dist/index.jsdelivr.iife.js',
-        format: 'iife',
-        name: 'shiki',
-        extend: true,
-        plugins: [
-          replace({
-            __CDN_ROOT__: `https://cdn.jsdelivr.net/npm/shiki@${version}/`
-          })
-        ]
-      }
-    ],
-    plugins: [
-      replace({
-        __BROWSER__: JSON.stringify(true)
+        __BROWSER__: JSON.stringify(true),
+        __CDN_ROOT__: ''
       }),
       typescript(),
       nodeResolve(),

@@ -1,22 +1,12 @@
-import { join, dirname } from './utils'
+import { join, dirpathparts } from './utils'
 import type { IOnigLib, IRawGrammar, IRawTheme } from 'vscode-textmate'
 import { loadWASM, createOnigScanner, createOnigString } from 'vscode-oniguruma'
 import { parse, ParseError } from 'jsonc-parser'
 import type { IShikiTheme } from './types'
-import { join as nodeJoin } from 'path-browserify'
-
-export const isWebWorker =
-  typeof self !== 'undefined' && typeof self.WorkerGlobalScope !== 'undefined'
-
-export const isBrowser =
-  isWebWorker ||
-  (typeof window !== 'undefined' &&
-    typeof window.document !== 'undefined' &&
-    typeof fetch !== 'undefined')
 
 // to be replaced by rollup
 let CDN_ROOT = '__CDN_ROOT__'
-let WASM: string | ArrayBuffer = ''
+let WASM: ArrayBuffer = new ArrayBuffer(0)
 
 export function isURL(string: string) {
   try {
@@ -26,10 +16,9 @@ export function isURL(string: string) {
     return false
   }
 }
-
-export function joinURL(urlString: string, ...paths: string[]) {
-  const url = new URL(urlString)
-  url.pathname = nodeJoin(url.pathname, ...paths).replace(/\\/g, '/')
+export function joinURL(urlStr, path) {
+  const url = new URL(urlStr)
+  url.pathname = join(dirpathparts(url.pathname).join('/'), path)
   return url.toString()
 }
 
@@ -52,7 +41,7 @@ export function setCDN(root: string) {
  *
  * Accepts Url or ArrayBuffer
  */
-export function setWasm(path: string | ArrayBuffer) {
+export function setWasm(path: ArrayBuffer) {
   WASM = path
 }
 
@@ -60,23 +49,7 @@ let _onigurumaPromise: Promise<IOnigLib> = null
 
 export async function getOniguruma(): Promise<IOnigLib> {
   if (!_onigurumaPromise) {
-    let loader: Promise<void>
-
-    if (isBrowser) {
-      if (typeof WASM === 'string') {
-        loader = loadWASM({
-          data: await fetch(_resolvePath('dist/onig.wasm')).then(r => r.arrayBuffer())
-        })
-      } else {
-        loader = loadWASM(WASM)
-      }
-    } else {
-      const path: typeof import('path') = require('path')
-      const wasmPath = path.join(require.resolve('vscode-oniguruma'), '../onig.wasm')
-      const fs: typeof import('fs') = require('fs')
-      const wasmBin = fs.readFileSync(wasmPath).buffer
-      loader = loadWASM(wasmBin)
-    }
+    const loader: Promise<void> = loadWASM(WASM)
 
     _onigurumaPromise = loader.then(() => {
       return {
@@ -93,22 +66,12 @@ export async function getOniguruma(): Promise<IOnigLib> {
 }
 
 function _resolvePath(filepath: string) {
-  if (isBrowser) {
-    if (!CDN_ROOT) {
-      console.warn(
-        '[Shiki] no CDN provider found, use `setCDN()` to specify the CDN for loading the resources before calling `getHighlighter()`'
-      )
-    }
-    return `${CDN_ROOT}${filepath}`
-  } else {
-    const path = require('path') as typeof import('path')
-
-    if (path.isAbsolute(filepath)) {
-      return filepath
-    } else {
-      return path.resolve(__dirname, '..', filepath)
-    }
+  if (!CDN_ROOT) {
+    console.warn(
+      '[Shiki] no CDN provider found, use `setCDN()` to specify the CDN for loading the resources before calling `getHighlighter()`'
+    )
   }
+  return `${CDN_ROOT}${filepath}`
 }
 
 /**
@@ -120,12 +83,7 @@ async function _fetchAssets(filepath: string): Promise<string> {
   }
 
   const path = _resolvePath(filepath)
-  if (isBrowser) {
-    return await fetch(path).then(r => r.text())
-  } else {
-    const fs = require('fs') as typeof import('fs')
-    return await fs.promises.readFile(path, 'utf-8')
-  }
+  return await fetch(path).then(r => r.text())
 }
 
 async function _fetchJSONAssets(filepath: string) {
@@ -151,8 +109,8 @@ export async function fetchTheme(themePath: string): Promise<IShikiTheme> {
 
   if (shikiTheme.include) {
     const includedThemePath = isURL(themePath)
-      ? joinURL(themePath, '..', shikiTheme.include)
-      : join(dirname(themePath), shikiTheme.include)
+      ? joinURL(themePath, shikiTheme.include)
+      : join(dirpathparts(themePath).join('/'), shikiTheme.include)
     const includedTheme = await fetchTheme(includedThemePath)
 
     if (includedTheme.settings) {

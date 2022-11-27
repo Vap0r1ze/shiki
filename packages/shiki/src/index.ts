@@ -12,7 +12,7 @@ export { setCDN, setWasm, fetchTheme as loadTheme, toShikiTheme } from './loader
 import { setWasm } from './loader'
 
 /** @deprecated use setWasm instead, will be removed in a future version */
-export function setOnigasmWASM(path: string | ArrayBuffer) {
+export function setOnigasmWASM(path: ArrayBuffer) {
   setWasm(path)
 }
 export {
