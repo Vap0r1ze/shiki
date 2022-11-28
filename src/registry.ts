@@ -1,6 +1,6 @@
 import { IGrammar, Registry as TextMateRegistry } from 'vscode-textmate'
 import { IShikiTheme, IThemeRegistration, ILanguageRegistration } from './types'
-import { fetchTheme, toShikiTheme } from './loader'
+import { fetchTheme, isURL, toShikiTheme } from './loader'
 import { Resolver } from './resolver'
 
 export class Registry extends TextMateRegistry {
@@ -24,7 +24,9 @@ export class Registry extends TextMateRegistry {
   public async loadTheme(theme: IShikiTheme | string) {
     if (typeof theme === 'string') {
       if (!this._resolvedThemes[theme]) {
-        this._resolvedThemes[theme] = await fetchTheme(`${this.themesPath}${theme}.json`)
+        this._resolvedThemes[theme] = await fetchTheme(
+          isURL(theme) ? theme : `${this.themesPath}${theme}.json`
+        )
       }
       return this._resolvedThemes[theme]
     } else {

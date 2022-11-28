@@ -5,6 +5,7 @@ import typescript from 'rollup-plugin-typescript2'
 import copy from 'rollup-plugin-copy'
 import replace from '@rollup/plugin-replace'
 import { terser } from 'rollup-plugin-terser'
+import prettier from 'rollup-plugin-prettier'
 
 export default [
   {
@@ -12,13 +13,19 @@ export default [
     output: [
       {
         file: 'dist/index.mjs',
-        format: 'esm'
+        format: 'esm',
+        plugins: [
+          prettier({
+            parser: 'babel'
+          })
+        ]
       },
       {
         file: 'dist/index.js',
         format: 'iife',
         name: 'shiki',
-        extend: true
+        extend: true,
+        plugins: [terser()]
       }
     ],
     plugins: [
@@ -31,8 +38,7 @@ export default [
       }),
       typescript(),
       nodeResolve(),
-      commonjs(),
-      terser()
+      commonjs()
     ]
   },
   {
